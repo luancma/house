@@ -47,7 +47,6 @@ const useGetCurrentMonthPayments = () => {
       .gte("payed_at", new Date(2024, currentMonth, 1).toISOString())
       .lte("payed_at", new Date(2024, currentMonth + 1, 0).toISOString());
     if (error) {
-      console.error(error);
       setPayments([]);
       setIsFetching(false);
       return;
