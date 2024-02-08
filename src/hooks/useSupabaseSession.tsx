@@ -8,7 +8,6 @@ export const useSupabaseSession = () => {
   );
   useEffect(() => {
     supabase.auth.getSession().then(({ data, error }) => {
-      console.log("data", data);
       if (error) {
         console.error("Error getting session:", error);
       } else {
@@ -17,8 +16,7 @@ export const useSupabaseSession = () => {
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log(`Supabase auth event: ${event}`);
+      (session) => {
         setSession(session);
       }
     );

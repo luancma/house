@@ -30,7 +30,6 @@ const DebtList = ({
   const fetchDebts = async () => {
     const { data, error } = await supabase.from("debt").select("*");
     if (error) {
-      console.log(error);
       return;
     }
     setDebts(data);
@@ -73,7 +72,6 @@ const PersonList = ({
   const fetchPeople = async () => {
     const { data, error } = await supabase.from("responsible").select("*");
     if (error) {
-      console.log(error);
       return;
     }
     setPeople(data);
@@ -124,12 +122,7 @@ function CreatePaymentRequest() {
       ...prevState,
       payed_at: new Date().toISOString(),
     }));
-
-
-    supabase.from("payments").insert([paymentDebts]).then((response) => {
-      console.log(response);
-    })
-
+    supabase.from("payments").insert([paymentDebts])
   }
 
   function onWillDismiss() {
