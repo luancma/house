@@ -1,0 +1,8 @@
+.item-wrapper {
+    padding: 1rem 0;
+}
+
+.date-picker {
+    display: flex;
+    justify-content: center;
+}
