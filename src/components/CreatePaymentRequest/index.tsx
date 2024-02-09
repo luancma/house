@@ -10,126 +10,48 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { supabase } from "../../services/supabase";
 import "./styles.css";
+import { PeopleSelect } from "../PeopleSelect";
+import { DebtsSelect } from "../DebtsSelect";
 
-const DebtList = ({
-  setDebit,
-}: {
-  setDebit: (key: string, value: number) => void;
-}) => {
-  const [debts, setDebts] = React.useState<
-    {
-      created_at: string;
-      id: number;
-      name: string;
-      values_history: unknown;
-    }[]
-  >([]);
-  const fetchDebts = async () => {
-    const { data, error } = await supabase.from("debt").select("*");
-    if (error) {
-      return;
-    }
-    setDebts(data);
-  };
-  useEffect(() => {
-    fetchDebts();
-  }, []);
-  return (
-    <div className="item-wrapper">
-      <IonSelect
-        aria-label="fatura"
-        label="Fatura"
-        labelPlacement="floating"
-        fill="outline"
-        interface="popover"
-        onIonChange={(e) => setDebit("debt", e.detail.value)}
-      >
-        {debts.map((debt) => (
-          <IonSelectOption key={debt.id} value={debt.id}>
-            {debt.name}
-          </IonSelectOption>
-        ))}
-      </IonSelect>
-    </div>
-  );
-};
 
-const PersonList = ({
-  setPerson,
-}: {
-  setPerson: (key: string, value: number) => void;
-}) => {
-  const [people, setPeople] = React.useState<
-    {
-      created_at: string;
-      id: number;
-      name: string;
-    }[]
-  >([]);
-  const fetchPeople = async () => {
-    const { data, error } = await supabase.from("responsible").select("*");
-    if (error) {
-      return;
-    }
-    setPeople(data);
-  };
-  useEffect(() => {
-    fetchPeople();
-  }, []);
 
-  return (
-    <div className="item-wrapper">
-      <IonSelect
-        className="select-wrapper"
-        aria-label="fatura"
-        label="Responsável"
-        labelPlacement="floating"
-        fill="outline"
-        interface="popover"
-        onIonChange={(e) => setPerson("responsible", e.detail.value)}
-      >
-        {people.map((person) => (
-          <IonSelectOption key={person.id} value={person.id}>
-            {person.name}
-          </IonSelectOption>
-        ))}
-        {/* <IonSelectOption value="apple">Laurilio</IonSelectOption> */}
-        {/* <IonSelectOption value="banana">Ana Maria</IonSelectOption> */}
-      </IonSelect>
-    </div>
-  );
-};
 
 function CreatePaymentRequest() {
+  const modal = useRef<HTMLIonModalElement>(null);
   const [paymentDebts, setPaymentDebts] = React.useState<{
     responsible: number;
-    debt: number;
+    debt: number | null;
     price: number;
     payed_at: string;
+    custom_debt: null | string;
   }>({
     responsible: 0,
     debt: 0,
     price: 0,
     payed_at: "",
+    custom_debt: null,
   });
-
-  const modal = useRef<HTMLIonModalElement>(null);
   function confirm() {
-    setPaymentDebts((prevState) => ({
-      ...prevState,
+    const paymentObj = {
+      ...paymentDebts,
       payed_at: new Date().toISOString(),
-    }));
-    supabase.from("payments").insert([paymentDebts])
+      debt: paymentDebts.custom_debt ? null : paymentDebts.debt,
+    };
+    setPaymentDebts(paymentObj);
+    supabase.from("payments").insert([paymentObj]).then((res) => {
+      console.log(res)
+      modal.current?.dismiss();
+    })
   }
 
   function onWillDismiss() {
     modal.current?.dismiss();
   }
 
-  function handlePaymentDebts(key: string, value: number) {
+  function handlePaymentDebts(key: string, value: number | string) {
     setPaymentDebts((prevState) => ({
       ...prevState,
       [key]: value,
@@ -204,8 +126,8 @@ function CreatePaymentRequest() {
         </IonToolbar>
       </IonHeader>
       <IonContent className="list-container ion-padding">
-        <PersonList setPerson={handlePaymentDebts} />
-        <DebtList setDebit={handlePaymentDebts} />
+        <PeopleSelect setPerson={handlePaymentDebts} />
+        <DebtsSelect setDebit={handlePaymentDebts} />
 
         <div className="item-wrapper">
           <IonSelect

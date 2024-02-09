@@ -57,3 +57,12 @@
   height: 100%;
   width: 100%;
 }
+
+.action-sheet-group-cancel span {
+  color: #eb445a;
+}
+
+.action-sheet-selected.sc-ion-action-sheet-md {
+  background-color: var(--ion-color-step-400);
+  color: var(--button-color-selected);
+}

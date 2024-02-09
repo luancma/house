@@ -12,8 +12,6 @@ import {
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
 import { walletSharp } from "ionicons/icons";
-import Tab1 from "./pages/Tab1";
-import Tab2 from "./pages/Tab2";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -35,6 +33,7 @@ import "@ionic/react/css/display.css";
 import "./theme/variables.css";
 import LoginPage from "./pages/Login";
 import { useSupabaseSession } from "./hooks/useSupabaseSession";
+import Month from "./pages/Month/Month";
 setupIonicReact();
 
 const App: React.FC = () => {
@@ -55,18 +54,15 @@ const App: React.FC = () => {
         ) : (
           <IonTabs>
             <IonRouterOutlet>
-              <Route exact path="/tab1">
-                <Tab1 />
-              </Route>
-              <Route exact path="/tab2">
-                <Tab2 />
+              <Route exact path="/month">
+                <Month />
               </Route>
               <Route exact path="/">
-                <Redirect to="/tab1" />
+                <Redirect to="/month" />
               </Route>
             </IonRouterOutlet>
             <IonTabBar slot="bottom">
-              <IonTabButton tab="tab1" href="/tab1">
+              <IonTabButton tab="month" href="/month">
                 <IonIcon aria-hidden="true" icon={walletSharp} color="success" />
                 <IonLabel color={"success"}>Pagamentos</IonLabel>
               </IonTabButton>
