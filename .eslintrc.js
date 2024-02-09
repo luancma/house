@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 module.exports = {
   root: true,
   env: {
@@ -21,8 +22,8 @@ module.exports = {
     },
   },
   rules: {
-    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-console": process.env.NODE_ENV !== "dev" ? "warn" : "off",
+    "no-debugger": process.env.NODE_ENV !== "dev" ? "warn" : "off",
     "unused-imports/no-unused-imports": "error",
   },
 };

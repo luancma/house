@@ -9,7 +9,7 @@ export const useSupabaseSession = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
-        console.error("Error getting session:", error);
+        return setSession("error");
       } else {
         setSession(data?.session);
       }
