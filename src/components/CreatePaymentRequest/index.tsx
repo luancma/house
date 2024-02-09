@@ -41,8 +41,7 @@ function CreatePaymentRequest() {
       debt: paymentDebts.custom_debt ? null : paymentDebts.debt,
     };
     setPaymentDebts(paymentObj);
-    supabase.from("payments").insert([paymentObj]).then((res) => {
-      console.log(res)
+    supabase.from("payments").insert([paymentObj]).then(() => {
       modal.current?.dismiss();
     })
   }
