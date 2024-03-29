@@ -11,4 +11,6 @@ export type PaymentProps = {
     name: string;
   };
   custom_debt: string | null;
-}[];
+  month: number;
+  deleted: boolean;
+}

@@ -1,0 +1,41 @@
+[
+  {
+      "id": 4,
+      "price": 500000,
+      "payed_at": "2024-03-28T15:28:40.886+00:00",
+      "custom_debt": "CUSTOM CUSTOM 1",
+      "month": "3",
+      "deleted": false,
+      "responsible": {
+          "id": 1,
+          "name": "Ana Maria"
+      },
+      "debt": null
+  },
+  {
+      "id": 5,
+      "price": 123,
+      "payed_at": "2024-03-28T15:28:40.886+00:00",
+      "custom_debt": "CUSTOM CUSTOM 2",
+      "month": "3",
+      "deleted": false,
+      "responsible": {
+          "id": 1,
+          "name": "Ana Maria"
+      },
+      "debt": null
+  },
+  {
+      "id": 6,
+      "price": 123,
+      "payed_at": "2024-03-28T15:28:40.886+00:00",
+      "custom_debt": "CUSTOM CUSTOM 3",
+      "month": "3",
+      "deleted": false,
+      "responsible": {
+          "id": 1,
+          "name": "Ana Maria"
+      },
+      "debt": null
+  }
+]

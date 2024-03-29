@@ -7,9 +7,9 @@
     "@ionic/react-router": "^7.0.0",
     "@ionic/storage": "^4.0.0",
     "@supabase/supabase-js": "^2.39.3",
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^12.6.3",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.2",
+    "@testing-library/user-event": "^14.5.2",
     "@types/jest": "^26.0.20",
     "@types/node": "^12.19.15",
     "@types/react": "^18.0.17",
@@ -40,16 +40,23 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.3",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-react": "^7.24.1",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.35.0",
     "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-unused-imports": "^3.0.0"
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "msw": "^2.2.13"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons)/)'",
+    "test": "react-scripts test --transformIgnorePatterns 'node_modules/(?!(@ionic/react|@ionic/react-router|@ionic/core|@stencil/core|ionicons|)/)'",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .ts,.tsx src"
   },
@@ -61,5 +68,15 @@
     "Safari >=14",
     "iOS >=14"
   ],
-  "description": "An Ionic project"
+  "jest": {
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  },
+  "description": "An Ionic project",
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
 }

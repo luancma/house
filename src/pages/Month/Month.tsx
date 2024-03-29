@@ -13,76 +13,94 @@ import {
 } from "@ionic/react";
 import "./month.css";
 import { Header } from "../../components/Header";
-import { add, checkmarkDoneSharp } from "ionicons/icons";
+import { add, checkmarkDoneSharp, trashBinSharp } from "ionicons/icons";
 import { convertPriceFormat } from "../../utils/convertPriceFormat";
 import { convertDateFormat } from "../../utils/convertDateFormat";
-import { useMonthSlice } from "../../context/monthSlice";
+import { monthList, useMonthSlice } from "../../context/monthSlice";
 import { CreatePaymentRequest } from "../../components/CreatePaymentRequest";
 import { useGetCurrentMonthPayments } from "../../hooks/useGetCurrentMonthPayments";
-const Month: React.FC = () => {
+import { RemoveCardAlert } from "../../components/RemoveCardAlert";
+import { usePayments } from "../../context/usePayments";
+import { supabase } from "../../services/supabase";
+import { PaymentProps } from "../../utils/types";
+
+const Month = () => {
+  const [openRemoveCardAlert, setOpenRemoveCardAlert] = React.useState(false);
+  const [selectedItem, setSelectedItem] = React.useState<PaymentProps | null>(null);
   const month = useMonthSlice((state) => state.month);
-  const selectedMonth = useMonthSlice((state) => state.selectMonth);
+  const selectMonth = useMonthSlice((state) => state.selectMonth);
   const [, setIsModalOpen] = React.useState(false);
-  const { payments, isFetching } = useGetCurrentMonthPayments();
-  const monthList = [
-    {
-      id: 1,
-      name: "Janeiro",
-    },
-    {
-      id: 2,
-      name: "Fevereiro",
-    },
-    {
-      id: 3,
-      name: "Março",
-    },
-    {
-      id: 4,
-      name: "Abril",
-    },
-    {
-      id: 5,
-      name: "Maio",
-    },
-    {
-      id: 6,
-      name: "Junho",
-    },
-    {
-      id: 7,
-      name: "Julho",
-    },
-    {
-      id: 8,
-      name: "Agosto",
-    },
-    {
-      id: 9,
-      name: "Setembro",
-    },
-    {
-      id: 10,
-      name: "Outubro",
-    },
-    {
-      id: 11,
-      name: "Novembro",
-    },
-    {
-      id: 12,
-      name: "Dezembro",
-    },
-  ];
+  const { isFetching } = useGetCurrentMonthPayments();
+  const payments = usePayments((state) => state.payments);
+  const insertPayment = usePayments((state) => state.insertPayment);
+  const removePayment = usePayments((state) => state.removePayment);
+  const updatePayment = usePayments((state) => state.updatePayment);
 
   useEffect(() => {
-    selectedMonth(monthList[new Date().getMonth()]);
+    selectMonth(new Date().getMonth());
   }, [])
+
+
+  useEffect(() => {
+    const roomSubscription = supabase
+      .channel('any')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments', filter: `month=eq.${month?.id}` }, payload => {
+        if (payload.eventType === 'INSERT') {
+          const getDetails = async () => {
+            const { data, error } = await supabase
+              .from("payments")
+              .select(`id, price, payed_at, custom_debt, responsible ( id, name ), debt ( id, name ), month, deleted`)
+              .eq("month", month?.id)
+              .eq("id", payload.new.id)
+              .eq("deleted", false);
+
+            if (data?.length) {
+              insertPayment(data[0] as unknown as PaymentProps);
+            }
+            if (error) {
+              return;
+            }
+          }
+          getDetails();
+        }
+        if (payload.eventType === 'DELETE') {
+          removePayment(payload.old as PaymentProps);
+        }
+        if (payload.eventType === 'UPDATE') {
+          if (payload.new.deleted) {
+            removePayment(payload.new as PaymentProps);
+          }
+          if (!payload.new.deleted) {
+            const getDetails = async () => {
+              const { data, error } = await supabase
+                .from("payments")
+                .select(`id, price, payed_at, custom_debt, responsible ( id, name ), debt ( id, name ), month, deleted`)
+                .eq("month", month?.id)
+                .eq("id", payload.new.id)
+                .eq("deleted", false);
+              if (error) {
+                return;
+              }
+              if (data?.length) {
+                updatePayment(data[0] as unknown as PaymentProps);
+              }
+            }
+            getDetails();
+          }
+        }
+      })
+      .subscribe()
+
+    return () => {
+      roomSubscription.unsubscribe();
+    };
+  }, [month]);
 
   return (
     <IonPage>
       <Header />
       <IonContent fullscreen class="ion-padding">
+
         <>
           <IonSelect
             value={month?.id}
@@ -97,7 +115,7 @@ const Month: React.FC = () => {
             onIonChange={(e) => {
               const month = monthList.find((item) => item.id === e.detail.value);
               if (month) {
-                selectedMonth(month);
+                selectMonth(month.id);
               }
             }}>
             {monthList.map((month) => (
@@ -108,7 +126,7 @@ const Month: React.FC = () => {
             ))}
           </IonSelect>
           {isFetching ? (
-            <div className="loadingContent">
+            <div className="loadingContent" data-testid="loading-spinner">
               <IonSpinner />
             </div>
           ) : (
@@ -119,7 +137,7 @@ const Month: React.FC = () => {
                     <h4>Gastos:</h4>
                   </IonText>
                   <IonList>
-                    {payments?.map((item) => (
+                    {payments?.map((item: PaymentProps) => (
                       <div className="list-item" key={item.id}>
                         <div className="item-content">
                           <p className="item-title">{item?.debt?.name || item.custom_debt}</p>
@@ -131,6 +149,15 @@ const Month: React.FC = () => {
                         <IonText color="medium" class="item-date">
                           <p>{convertDateFormat(item.payed_at)}</p>
                         </IonText>
+                        <IonIcon
+                          id="open-delete-card-alert"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setOpenRemoveCardAlert(true);
+                          }}
+                          className="item-icon item-icon-remove"
+                          icon={trashBinSharp}
+                          color="danger" />
                         <IonIcon
                           className="item-icon"
                           icon={checkmarkDoneSharp}
@@ -147,7 +174,18 @@ const Month: React.FC = () => {
             </>
           )}
         </>
+        {openRemoveCardAlert ? (
+          <RemoveCardAlert
+            selectedItem={selectedItem as PaymentProps}
+            isOpen={openRemoveCardAlert}
+            setOpenRemoveCardAlert={() => {
+              setOpenRemoveCardAlert(false)
+              setSelectedItem(null)
+            }} />
+        ) : null
+        }
       </IonContent>
+
       <div
         style={{
           marginTop: "80px",
@@ -169,7 +207,7 @@ const Month: React.FC = () => {
         </IonFab>
       </div>
       <CreatePaymentRequest />
-    </IonPage>
+    </IonPage >
   );
 };
 

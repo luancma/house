@@ -50,6 +50,10 @@
   top: 0.5rem;
 }
 
+.list-item .item-icon.item-icon-remove {
+  right: 64px;
+}
+
 .loadingContent {
   display: flex;
   justify-content: center;

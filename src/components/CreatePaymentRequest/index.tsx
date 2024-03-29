@@ -15,11 +15,21 @@ import { supabase } from "../../services/supabase";
 import "./styles.css";
 import { PeopleSelect } from "../PeopleSelect";
 import { DebtsSelect } from "../DebtsSelect";
-
-
+import { useMonthSlice } from "../../context/monthSlice";
 
 
 function CreatePaymentRequest() {
+  const currentMonth = useMonthSlice((state) => state.month);
+  const changeMonth = useMonthSlice((state) => state.selectMonth);
+
+  const initialValue = {
+    responsible: 0,
+    debt: 0,
+    price: 0,
+    payed_at: "",
+    custom_debt: null,
+    month: undefined
+  }
   const modal = useRef<HTMLIonModalElement>(null);
   const [paymentDebts, setPaymentDebts] = React.useState<{
     responsible: number;
@@ -27,32 +37,35 @@ function CreatePaymentRequest() {
     price: number;
     payed_at: string;
     custom_debt: null | string;
-  }>({
-    responsible: 0,
-    debt: 0,
-    price: 0,
-    payed_at: "",
-    custom_debt: null,
-  });
-  function confirm() {
+    month: number | undefined;
+  }>(initialValue);
+
+
+  const confirm = () => {
     const paymentObj = {
       ...paymentDebts,
       payed_at: new Date().toISOString(),
       debt: paymentDebts.custom_debt ? null : paymentDebts.debt,
     };
-    setPaymentDebts(paymentObj);
-    supabase.from("payments").insert([paymentObj]).then(() => {
-      modal.current?.dismiss();
-    })
+    if (paymentObj.price > 0) {
+      supabase.from("payments").insert([paymentObj]).then(() => {
+        setPaymentDebts(initialValue)
+        changeMonth(paymentObj.month || currentMonth?.id || new Date().getMonth());
+        modal.current?.dismiss();
+      })
+    } else {
+      alert("O valor do pagamento deve ser maior que 0");
+    }
   }
 
   function onWillDismiss() {
+    setPaymentDebts(initialValue);
     modal.current?.dismiss();
   }
 
-  function handlePaymentDebts(key: string, value: number | string) {
-    setPaymentDebts((prevState) => ({
-      ...prevState,
+  const handlePaymentDebts = (key: string, value: number | string) => {
+    setPaymentDebts(() => ({
+      ...paymentDebts,
       [key]: value,
     }));
   }
@@ -135,6 +148,7 @@ function CreatePaymentRequest() {
             labelPlacement="floating"
             fill="outline"
             interface="popover"
+            value={paymentDebts.month}
             onIonChange={(e) => handlePaymentDebts("month", e.detail.value)}
           >
             {months.map((month) => (
@@ -153,7 +167,7 @@ function CreatePaymentRequest() {
             placeholder="Valor"
             fill="outline"
             type="number"
-            onIonChange={(e) =>
+            onIonInput={(e) =>
               handlePaymentDebts("price", Number(e.detail.value))
             }
           />
