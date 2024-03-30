@@ -37,7 +37,7 @@ const Month = () => {
   const updatePayment = usePayments((state) => state.updatePayment);
 
   useEffect(() => {
-    selectMonth(new Date().getMonth());
+    selectMonth(new Date().getMonth() + 1);
   }, [])
 
 
